@@ -1,44 +1,19 @@
-// server.js
-// where your node app starts
-
-// init project
-var express = require('express');
+var express = require("express");
 var app = express();
+var port = process.env.PORT || 8080;
+var bodyParser = require('body-parser');
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
-
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
-
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.get('/',(req,res)=>{
+    var lang = req.headers["accept-language"].split(",")[0];
+    var software = req.headers["user-agent"].match(/\((.+?)\)/)[1];
+    var out = {"ipaddress":req.ip,"language":lang,"software":software};
+   res.send(out); 
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+app.get("/",(req,res)=>{
+   res.send(req.body); 
 });
 
-app.get('/api/whoami', (req, res) => {
-  const software = req.get('user-agent');
-  const start = software.indexOf('(');
-  const end = software.indexOf(')');
-
-  const ipaddress = req.socket.localAddress.slice(req.socket.localAddress.lastIndexOf(':') + 1);
-
-  res.send({
-    ipaddress,
-    language: req.acceptsLanguages()[0],
-    software: software.slice(start + 1, end),
-  });
-});
-
-// listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+app.listen(port, function () {
+  console.log('App running on port '+port+"!");
 });
