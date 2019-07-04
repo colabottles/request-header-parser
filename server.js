@@ -24,7 +24,19 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get('/api/whoami', (req, res) => {
+  const software = req.get('user-agent');
+  const start = software.indexOf('(');
+  const end = software.indexOf(')');
 
+  const ipaddress = req.socket.localAddress.slice(req.socket.localAddress.lastIndexOf(':') + 1);
+
+  res.send({
+    ipaddress,
+    language: req.acceptsLanguages()[0],
+    software: software.slice(start + 1, end),
+  });
+});
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
