@@ -1,32 +1,24 @@
-var express = require('express');
-var app = express();
-var port = process.env.PORT || 8080;
-var staticFiles = __dirname + '/public';
-var indexHTML = __dirname + '/views/index.html';
+const express = require('express');
 
-app.get('/', function(req, res) {
-    res.sendFile(indexHTML);
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.sendFile(`${__dirname}/views/index.html`);
 });
 
-app.get('/headers', function(req, res) {
+app.use(express.static(`${__dirname}/public`));
 
-    var ip = req.headers["x-forwarded-for"].split(',').splice(0,1).toString();
-    var url = req.headers['host'];
-    var lang  = req.headers['accept-language'].split(',')[0]
-    var sys = req.headers['user-agent'].match(/\(([^)]+)\)/g)[0].slice(1,-1);
-
-    var obj = {
-        //"IP Address": ip,
-        "IP Address": url,
-        "Language" : lang,
-        "Operating System": sys
-    }
-
-    res.json(obj);
+app.get('/api/whoami', (req, res) => {
+  res.json({
+    ipaddress: req.headers['x-forwarded-for'].split(',')[0],
+    language: req.headers['accept-language'].split(',')[0],
+    software: req.headers['user-agent'].split(/[\(\)]/)[1]
+  });
 });
 
-app.use(express.static(staticFiles));
-
-app.listen(port, function() {
-    console.log(`Server is listening on port : ${port}`)
+app.use((req, res) => {
+  res.sendFile(`${__dirname}/views/404.html`, 404);
 });
+
+app.listen(port, console.log(`Server is listening at port ${port}.`));
